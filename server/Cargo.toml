@@ -14,3 +14,4 @@ chrono = { version = "0.4", features = ["serde"] }
 regex = "1.5.5"
 reqwest = { version = "0.11", features = ["blocking"] }
 parking_lot = "0.12"
+chrono-tz = "0.6"

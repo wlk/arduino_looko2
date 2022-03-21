@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::sync::Arc;
+use chrono::Utc;
 
 use parking_lot::RwLock;
 
@@ -26,6 +27,7 @@ pub fn add_record(id: String, new_air_quality: AirQualityData, store: Store) -> 
             println!("new record: {:?}", &new_air_quality);
             let new_station_data = StationData {
                 id: id.clone(),
+                last_request_time: Utc::now(),
                 air_quality: Vec::from([new_air_quality]),
             };
 
@@ -33,13 +35,15 @@ pub fn add_record(id: String, new_air_quality: AirQualityData, store: Store) -> 
         }
         Some(_) => {
             // modify existing entry
-            current_station_data.map(|mut c| -> () {
-                println!("add record to entry: {:?}", c);
-                if c.air_quality.len() > Store::MAX_RECORDS {
-                    c.air_quality.remove(0);
+            current_station_data.map(|mut sd| -> () {
+                println!("add record to entry: {:?}", sd);
+                if sd.air_quality.len() > Store::MAX_RECORDS {
+                    sd.air_quality.remove(0);
                 }
-                c.air_quality.push(new_air_quality);
-                store.data.write().insert(id.clone(), c);
+                sd.air_quality.push(new_air_quality);
+                sd.air_quality.dedup_by(|a, b| a.date == b.date);
+                sd.last_request_time = Utc::now();
+                store.data.write().insert(id.clone(), sd);
                 ()
             }
             );

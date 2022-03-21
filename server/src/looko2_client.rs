@@ -1,5 +1,6 @@
-use chrono::{DateTime, TimeZone, Utc};
+use chrono::{NaiveDateTime, TimeZone, Utc};
 use regex::Regex;
+use chrono_tz::Europe::Warsaw;
 
 use models::AirQualityData;
 
@@ -38,10 +39,10 @@ pub fn parse_look_o2_body(body: String) -> Option<AirQualityData> {
 
         match (pm25_value, date_value) {
             (Some(pm25), Some(date)) => {
-                //let date: DateTime<Utc> = DateTime::parse_from_str(date, "%Y-%m-%d %H:%M:%S")?.with_timezone(Utc.datetime_from_str());
-                let date: DateTime<Utc> = Utc.datetime_from_str(date, "%Y-%m-%d %H:%M:%S").unwrap();//.with_timezone(Utc.datetime_from_str());
-                Some(AirQualityData { pm25, date })
-            },
+                let date = NaiveDateTime::parse_from_str(date, "%Y-%m-%d %H:%M:%S").unwrap();
+                let warsaw_time_in_utc = Warsaw.from_local_datetime(&date).unwrap().with_timezone(&Utc);
+                Some(AirQualityData { pm25, date: warsaw_time_in_utc })
+            }
             _ => None
         }
     }

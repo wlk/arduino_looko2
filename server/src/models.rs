@@ -10,5 +10,6 @@ pub struct AirQualityData {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct StationData {
     pub id: String,
+    pub last_request_time: DateTime<Utc>,
     pub air_quality: Vec<AirQualityData>,
 }

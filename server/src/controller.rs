@@ -14,28 +14,24 @@ pub struct Controller {}
 
 
 impl Controller {
-    pub fn new() -> Self {
-        Self {}
-    }
-
-
     pub async fn handle_get_station_data(station_id: String, s: Store) -> Result<impl warp::Reply, Infallible> {
-        fn xxx(sd: &StationData) -> bool {
-            let earlier = Utc::now() - Duration::seconds(15);//Duration::minutes(5);
-            let latest_entry = sd.air_quality.last().map(|x| x.date);
+        fn should_request_looko2(sd: &StationData) -> bool {
+            println!("now: {:?}", Utc::now());
+            let earlier = Utc::now() - Duration::minutes(5);
+            println!("earlier: {:?}", earlier);
 
-            match latest_entry {
-                Some(le) if le.gt(&earlier) => true,
-                _ => false
-            }
+            println!("latest_entry: {:?}", sd.last_request_time);
+            let result = earlier.gt(&sd.last_request_time);
+            println!("should_request_looko2:result: {:?}", result);
+            result
         }
 
         let current = store::get_all_for_station(&station_id, &s);
 
         let result: Option<StationData> = match current {
-            Some(dd) if xxx(&dd) => {
+            Some(dd) if !should_request_looko2(&dd) => {
                 Some(dd)
-            },
+            }
             _ => {
                 let looko2_body: Option<String> = looko2_client::latest_get_look_o2_body(&station_id).await;
                 println!("looko2 returned: {:?}", looko2_body);
