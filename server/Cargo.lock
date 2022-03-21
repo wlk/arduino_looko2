@@ -17,6 +17,7 @@ version = "0.1.0"
 dependencies = [
  "chrono",
  "futures",
+ "parking_lot",
  "pretty_env_logger",
  "regex",
  "reqwest",
@@ -122,6 +123,7 @@ dependencies = [
  "libc",
  "num-integer",
  "num-traits",
+ "serde",
  "time",
  "winapi",
 ]

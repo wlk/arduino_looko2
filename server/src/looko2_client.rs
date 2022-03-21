@@ -1,3 +1,4 @@
+use chrono::{DateTime, TimeZone, Utc};
 use regex::Regex;
 
 use models::AirQualityData;
@@ -16,7 +17,6 @@ pub async fn latest_get_look_o2_body(station_id: &String) -> Option<String> {
 fn capture<'a>(pattern: Regex, capture_name: &'a str, body: &'a str) -> Option<&'a str> {
     pattern.captures(&body).and_then(|c| {
         let value = c.name(capture_name).map(|x| x.as_str());
-        println!("{:?}", value);
         value
     })
 }
@@ -37,7 +37,11 @@ pub fn parse_look_o2_body(body: String) -> Option<AirQualityData> {
         let date_value = date_capture.map(|c| c);
 
         match (pm25_value, date_value) {
-            (Some(pm25), Some(date)) => Some(AirQualityData { pm25, date: date.to_string() }),
+            (Some(pm25), Some(date)) => {
+                //let date: DateTime<Utc> = DateTime::parse_from_str(date, "%Y-%m-%d %H:%M:%S")?.with_timezone(Utc.datetime_from_str());
+                let date: DateTime<Utc> = Utc.datetime_from_str(date, "%Y-%m-%d %H:%M:%S").unwrap();//.with_timezone(Utc.datetime_from_str());
+                Some(AirQualityData { pm25, date })
+            },
             _ => None
         }
     }
