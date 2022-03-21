@@ -15,7 +15,7 @@ extern crate chrono_tz;
 #[tokio::main]
 async fn main() {
     pretty_env_logger::init();
-    let addr: SocketAddr = SocketAddr::from(([0, 0, 0, 0], 6543));
+    let addr: SocketAddr = SocketAddr::from(([0, 0, 0, 0], 14479));
 
     let store: Store = Store::new();
 
