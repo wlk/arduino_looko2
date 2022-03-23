@@ -3,7 +3,7 @@ use chrono::prelude::*;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct AirQualityData {
-    pub pm25: f32,
+    pub pm25: u8,
     pub date: DateTime<Utc>,
 }
 

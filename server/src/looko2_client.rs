@@ -34,7 +34,7 @@ pub fn parse_look_o2_body(body: String) -> Option<AirQualityData> {
         let pm25_capture = capture(pm25_pattern, CAPTURE_NAME_PM25, &body);
         let date_capture = capture(date_pattern, CAPTURE_NAME_DATE, &body);
 
-        let pm25_value = pm25_capture.map(|c| c.parse::<f32>().unwrap_or(0.0));
+        let pm25_value = pm25_capture.map(|c| c.parse::<u8>().unwrap_or(0));
         let date_value = date_capture.map(|c| c);
 
         match (pm25_value, date_value) {

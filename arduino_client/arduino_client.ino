@@ -1,6 +1,8 @@
-//#include <ArduinoHttpClient.h>
 #include <ArduinoJson.h>
-#include <WiFiClientSecure.h>
+//#include <WiFiClientSecure.h>
+#include <WiFi.h>
+#include <HTTPClient.h>
+
 #include <TFT_eSPI.h>
 #include "secrets.h"
 
@@ -14,11 +16,11 @@ void setup() {
   tft.begin();
   tft.setRotation(1);
   Serial.begin(115200);
-  tft.fillScreen(TFT_BLACK);
+  tft.fillScreen(TFT_WHITE);
 
   tft.setCursor(49, 40);
   tft.setTextSize(1);
-  tft.setTextColor(TFT_WHITE);
+  tft.setTextColor(TFT_BLACK);
 
   WiFi.begin(SSID, PASSWORD);   
 
@@ -37,40 +39,35 @@ void setup() {
     i++;
   }
   
-  //tft.println("TEST");
   Serial.println("Setup done");
 }
 
 void getMeasurements() {
-  WiFiClient client; //if using server with SSL switch to WiFiClientSecure
-  if (!client.connect(SERVER_ADDR, SERVER_PORT)) {
-    Serial.println("unable to connect,  SERVER_ADDR, SERVER_PORT: " + String(SERVER_ADDR) + ", " + SERVER_PORT);
-    return;
-  }
+  HTTPClient http;
   String url = "http://"+ String(SERVER_ADDR) + ":" + SERVER_PORT + "/station/" +STATION_ID;
   Serial.println("url: " + url);
+  http.begin(url);
+  int httpResponseCode = http.GET();
+  if (httpResponseCode>0) {
+    Serial.print("HTTP Response code: ");
+    Serial.println(httpResponseCode);
+    String payload = http.getString();
+    //Serial.println(payload);
+    const size_t capacity = 6096;
+    DynamicJsonDocument doc(capacity);
+    deserializeJson(doc, payload);
+    JsonArray elements = doc["air_quality"].as<JsonArray>();
+    int total = elements.size();
+    JsonObject last = elements[total-1];
 
-  client.print(String("GET ") + url + " HTTP/1.1\r\n" +
-               "Host: "+SERVER_ADDR+"\r\n" +
-               "User-Agent: ESP32\r\n" +
-               "Connection: close\r\n\r\n");
-  while (client.connected()) {
-    String line = client.readStringUntil('\n');
-    Serial.println("line: " +line);
-    if (line.startsWith("{")) {
-    
-      const size_t capacity = 5096;
-      DynamicJsonDocument doc(capacity);
-      deserializeJson(doc, line);
-      int elements = doc["air_quality"].size();
-      Serial.println("total elements: " + elements);
-      readDate = (const char *)doc["air_quality"][elements-1]["date"];
-      pm25 = doc["air_quality"][elements-1]["pm25"];
- 
-      return;
-    }
+    pm25 = (int)last["pm25"];
+    readDate = (const char *)last["date"];
+  } else {
+    Serial.println("Error code: " + httpResponseCode);
   }
+  http.end();
 }
+
 
 void loop() {
   getMeasurements();
@@ -80,6 +77,8 @@ void loop() {
 }
 
 void writeHeader() {
+  tft.setTextColor(TFT_BLACK);
+
   if (WiFi.status() == WL_CONNECTED)
   {
     wifiStatus = "OK";
@@ -94,12 +93,24 @@ void writeHeader() {
 }
 
 void writeData() {
-  writeLineToTft(1, "pm25: " + pm25);
-  writeLineToTft(2, "date: " + readDate);
-}
+  tft.fillScreen(TFT_WHITE);
+  tft.setCursor(1, 15 + 11);
+  
+  tft.setTextSize(1);
+  tft.setTextColor(TFT_BLUE);
+  if(pm25 >= 13) tft.setTextColor(TFT_GREENYELLOW);
+  if(pm25 >= 35) tft.setTextColor(TFT_YELLOW);
+  if(pm25 >= 55) tft.setTextColor(TFT_RED);
+  tft.println("pm25: ");
+  tft.setCursor(30, 15 + 11);
+  tft.setTextSize(6);
+  tft.println(String(pm25));
 
-void writeLineToTft(int number, String text) {
-  tft.setCursor(1, 15 + 11 * number);
-  tft.println(text);
-  Serial.println(text);
+  tft.setCursor(30, 80);
+  tft.setTextSize(3);
+  tft.println(String(pm25*5) + "%");
+
+  tft.setCursor(2, 115);
+  tft.setTextSize(1);
+  tft.println(readDate);
 }
