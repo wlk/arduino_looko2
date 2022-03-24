@@ -10,7 +10,7 @@ https://github.com/espressif/arduino-esp32#installation-instructions
 3. Add libraries:
 ```
 ArduinoJson - version 6.18.5
-TFT_eSPI - version 1.4.16
+TFT_eSPI - use version from `library` folder
 ```
 
 4. On Ubuntu/Linux install following packages:
@@ -31,7 +31,8 @@ There are 3 secrets required, put them into `secrets.sh` with following content:
 #define SSID "ssid"
 #define PASSWORD "pass"
 #define STATION_ID "station_id"
-#define SERVER_ADDR "http://localhost:14479"
+#define SERVER_ADDR "ip_address"
+#define SERVER_PORT 1337
 ```
 
 

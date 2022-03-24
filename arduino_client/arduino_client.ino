@@ -1,5 +1,4 @@
 #include <ArduinoJson.h>
-//#include <WiFiClientSecure.h>
 #include <WiFi.h>
 #include <HTTPClient.h>
 
@@ -16,11 +15,11 @@ void setup() {
   tft.begin();
   tft.setRotation(1);
   Serial.begin(115200);
-  tft.fillScreen(TFT_WHITE);
+  tft.fillScreen(TFT_BLACK);
 
   tft.setCursor(49, 40);
   tft.setTextSize(1);
-  tft.setTextColor(TFT_BLACK);
+  tft.setTextColor(TFT_WHITE);
 
   WiFi.begin(SSID, PASSWORD);   
 
@@ -79,12 +78,9 @@ void loop() {
 void writeHeader() {
   tft.setTextColor(TFT_BLACK);
 
-  if (WiFi.status() == WL_CONNECTED)
-  {
+  if (WiFi.status() == WL_CONNECTED) {
     wifiStatus = "OK";
-  }
-  else
-  {
+  } else {
     wifiStatus = "ERROR";
   }
 
@@ -93,12 +89,12 @@ void writeHeader() {
 }
 
 void writeData() {
-  tft.fillScreen(TFT_WHITE);
+  tft.fillScreen(TFT_BLACK);
   tft.setCursor(1, 15 + 11);
   
   tft.setTextSize(1);
   tft.setTextColor(TFT_BLUE);
-  if(pm25 >= 13) tft.setTextColor(TFT_GREENYELLOW);
+  if(pm25 >= 13) tft.setTextColor(TFT_GREEN);
   if(pm25 >= 35) tft.setTextColor(TFT_YELLOW);
   if(pm25 >= 55) tft.setTextColor(TFT_RED);
   tft.println("pm25: ");
