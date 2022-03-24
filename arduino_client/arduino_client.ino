@@ -9,7 +9,9 @@ TFT_eSPI tft = TFT_eSPI();
 String wifiStatus = "NOT CONNECTED";
 
 String readDate = "";
+String oldReadDate = "";
 int pm25 = 0;
+int oldPm25 = 0;
 
 void setup() {
   tft.begin();
@@ -59,6 +61,8 @@ void getMeasurements() {
     int total = elements.size();
     JsonObject last = elements[total-1];
 
+    oldPm25 = pm25;
+    oldReadDate = readDate;
     pm25 = (int)last["pm25"];
     readDate = (const char *)last["date"];
   } else {
@@ -71,8 +75,9 @@ void getMeasurements() {
 void loop() {
   getMeasurements();
   writeHeader();
-  writeData();
-  delay(15000);
+  writeData(true);
+  writeData(false);
+  delay(30000);
 }
 
 void writeHeader() {
@@ -88,8 +93,10 @@ void writeHeader() {
   tft.println("WiFi: " + wifiStatus);
 }
 
-void writeData() {
-  tft.fillScreen(TFT_BLACK);
+void writeData(boolean colorOverride) {
+  int toWritePm25 = 0;
+  String toWriteDate = "";
+
   tft.setCursor(1, 15 + 11);
   
   tft.setTextSize(1);
@@ -97,16 +104,26 @@ void writeData() {
   if(pm25 >= 13) tft.setTextColor(TFT_GREEN);
   if(pm25 >= 35) tft.setTextColor(TFT_YELLOW);
   if(pm25 >= 55) tft.setTextColor(TFT_RED);
+  
+  if(colorOverride) {
+    tft.setTextColor(TFT_BLACK);
+    toWritePm25 = oldPm25;
+    toWriteDate = oldReadDate;
+  } else {
+    toWritePm25 = pm25;
+    toWriteDate = readDate;
+  }
+    
   tft.println("pm25: ");
   tft.setCursor(30, 15 + 11);
   tft.setTextSize(6);
-  tft.println(String(pm25));
+  tft.println(String(toWritePm25));
 
   tft.setCursor(30, 80);
   tft.setTextSize(3);
-  tft.println(String(pm25*5) + "%");
+  tft.println(String(toWritePm25*5) + "%");
 
   tft.setCursor(2, 115);
   tft.setTextSize(1);
-  tft.println(readDate);
+  tft.println(toWriteDate);
 }
