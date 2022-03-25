@@ -74,10 +74,12 @@ void getMeasurements() {
 
 void loop() {
   getMeasurements();
-  writeHeader();
-  writeData(true);
-  writeData(false);
-  delay(30000);
+  if(pm25 != oldPm25){
+    writeHeader();
+    writeData(true);
+    writeData(false);
+  }
+  delay(15000);
 }
 
 void writeHeader() {
@@ -123,7 +125,8 @@ void writeData(boolean colorOverride) {
   tft.setTextSize(3);
   tft.println(String(toWritePm25*5) + "%");
 
-  tft.setCursor(2, 115);
-  tft.setTextSize(1);
+  tft.setCursor(2, 112);
+  tft.setTextSize(2);
+  toWriteDate.remove(0,11);
   tft.println(toWriteDate);
 }
