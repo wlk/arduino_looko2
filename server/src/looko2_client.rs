@@ -1,6 +1,6 @@
 use chrono::{NaiveDateTime, TimeZone, Utc};
-use regex::Regex;
 use chrono_tz::Europe::Warsaw;
+use regex::Regex;
 
 use models::AirQualityData;
 
@@ -9,8 +9,10 @@ use crate::models;
 pub async fn latest_get_look_o2_body(station_id: &String) -> Option<String> {
     let url: String = format!("https://looko2.com/tracker2.php?search={}", station_id);
     let body = match reqwest::get(url).await {
-        Ok(r) if r.status() == reqwest::StatusCode::OK => Some(r.text().await.unwrap_or(String::new())),
-        _ => None
+        Ok(r) if r.status() == reqwest::StatusCode::OK => {
+            Some(r.text().await.unwrap_or(String::new()))
+        }
+        _ => None,
     };
     body
 }
@@ -40,10 +42,16 @@ pub fn parse_look_o2_body(body: String) -> Option<AirQualityData> {
         match (pm25_value, date_value) {
             (Some(pm25), Some(date)) => {
                 let date = NaiveDateTime::parse_from_str(date, "%Y-%m-%d %H:%M:%S").unwrap();
-                let warsaw_time_in_utc = Warsaw.from_local_datetime(&date).unwrap().with_timezone(&Utc);
-                Some(AirQualityData { pm25, date: warsaw_time_in_utc })
+                let warsaw_time_in_utc = Warsaw
+                    .from_local_datetime(&date)
+                    .unwrap()
+                    .with_timezone(&Utc);
+                Some(AirQualityData {
+                    pm25,
+                    date: warsaw_time_in_utc,
+                })
             }
-            _ => None
+            _ => None,
         }
     }
 }

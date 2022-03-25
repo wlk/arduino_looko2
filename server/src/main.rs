@@ -1,13 +1,13 @@
-mod models;
-mod looko2_client;
 mod controller;
+mod looko2_client;
+mod models;
 mod store;
 
 use std::net::SocketAddr;
 
-use warp::Filter;
 use crate::controller::Controller;
 use crate::store::Store;
+use warp::Filter;
 
 extern crate chrono;
 extern crate chrono_tz;
@@ -27,7 +27,5 @@ async fn main() {
 
     println!("Listening on http://{}", addr);
 
-    warp::serve(get_station_data)
-        .run(addr)
-        .await;
+    warp::serve(get_station_data).run(addr).await;
 }

@@ -1,5 +1,5 @@
-use serde_derive::{Deserialize, Serialize};
 use chrono::prelude::*;
+use serde_derive::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct AirQualityData {

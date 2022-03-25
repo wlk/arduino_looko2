@@ -1,6 +1,6 @@
+use chrono::Utc;
 use std::collections::HashMap;
 use std::sync::Arc;
-use chrono::Utc;
 
 use parking_lot::RwLock;
 
@@ -15,10 +15,18 @@ pub struct Store {
 impl Store {
     const MAX_RECORDS: usize = 50;
 
-    pub fn new() -> Self { Self { data: Arc::new(RwLock::new(HashMap::new())) } }
+    pub fn new() -> Self {
+        Self {
+            data: Arc::new(RwLock::new(HashMap::new())),
+        }
+    }
 }
 
-pub fn add_record(id: String, new_air_quality: AirQualityData, store: Store) -> Option<StationData> {
+pub fn add_record(
+    id: String,
+    new_air_quality: AirQualityData,
+    store: Store,
+) -> Option<StationData> {
     let current_station_data: Option<StationData> = store.data.read().get(&id).cloned();
 
     match current_station_data {
@@ -45,8 +53,7 @@ pub fn add_record(id: String, new_air_quality: AirQualityData, store: Store) -> 
                 sd.last_request_time = Utc::now();
                 store.data.write().insert(id.clone(), sd);
                 ()
-            }
-            );
+            });
         }
     }
     get_all_for_station(&id, &store)
